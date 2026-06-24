@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>하루 만에 끝내는 클로드 셋업 가이드</title>
+<style>
+  :root{
+    --bg:#0f1117; --card:#1a1d27; --card2:#222634; --line:#2e3342;
+    --txt:#e8eaf0; --mut:#9aa0b0; --accent:#7c5cff; --accent2:#00c2a8;
+    --warn:#ff6b6b; --ok:#2ecc71; --gh:#f0883e; --gold:#ffcf5c;
+    --claude:#d97757; --code:#7c5cff; --obs:#a78bfa; --herm:#00c2a8;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--txt);font-family:-apple-system,"Apple SD Gothic Neo","Pretendard","Malgun Gothic",sans-serif;line-height:1.6;padding:28px 18px 60px}
+  .wrap{max-width:1000px;margin:0 auto}
+  h1{font-size:30px;font-weight:800;letter-spacing:-.5px;margin-bottom:6px}
+  h1 .sub{display:block;font-size:15px;font-weight:500;color:var(--mut);margin-top:8px}
+  h2{font-size:20px;font-weight:700;margin:38px 0 14px;display:flex;align-items:center;gap:10px}
+  h2 .n{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:8px;background:var(--accent);color:#fff;font-size:14px;font-weight:800}
+  .lead{color:var(--mut);font-size:15px;margin:10px 0 4px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px 18px}
+  .grid{display:grid;gap:14px}
+  .g2{grid-template-columns:repeat(2,1fr)} .g3{grid-template-columns:repeat(3,1fr)} .g4{grid-template-columns:repeat(4,1fr)}
+  @media(max-width:760px){.g2,.g3,.g4{grid-template-columns:1fr}}
+  .tag{display:inline-block;font-size:11px;font-weight:700;padding:3px 9px;border-radius:999px;margin-bottom:8px}
+
+  /* ECOSYSTEM MAP */
+  .map{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:22px}
+  .layer-label{font-size:12px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:1px;margin:4px 0 10px}
+  .tools{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+  @media(max-width:760px){.tools{grid-template-columns:repeat(2,1fr)}}
+  .tool{border-radius:12px;padding:14px 12px;text-align:center;border:1px solid var(--line);background:var(--card2)}
+  .tool .ico{font-size:24px} .tool .nm{font-weight:800;font-size:14px;margin-top:6px}
+  .tool .ds{font-size:11.5px;color:var(--mut);margin-top:4px;line-height:1.4}
+  .tool.claude{border-color:var(--claude)} .tool.code{border-color:var(--code)}
+  .tool.obs{border-color:var(--obs)} .tool.herm{border-color:var(--herm)}
+  .arrows{display:flex;justify-content:center;align-items:center;gap:8px;color:var(--accent);font-size:13px;font-weight:700;margin:14px 0;flex-wrap:wrap}
+  .arrows .down{font-size:20px;color:var(--accent2)}
+  .hub{background:linear-gradient(135deg,#241c12,#2a1f12);border:2px solid var(--gh);border-radius:14px;padding:18px;text-align:center}
+  .hub .ico{font-size:30px} .hub .nm{font-size:18px;font-weight:800;margin-top:4px}
+  .hub .ds{font-size:13px;color:var(--gold);margin-top:6px}
+  .mirror{display:flex;gap:10px;justify-content:center;margin-top:14px;flex-wrap:wrap}
+  .pill{background:var(--card2);border:1px dashed var(--line);border-radius:10px;padding:8px 14px;font-size:12.5px;color:var(--mut)}
+  .pill b{color:var(--txt)}
+
+  /* tool detail cards */
+  .tcard{border-left:4px solid var(--accent);background:var(--card)}
+  .tcard.claude{border-left-color:var(--claude)} .tcard.code{border-left-color:var(--code)}
+  .tcard.obs{border-left-color:var(--obs)} .tcard.herm{border-left-color:var(--herm)} .tcard.gh{border-left-color:var(--gh)}
+  .tcard h3{font-size:15px;margin-bottom:4px;display:flex;align-items:center;gap:8px}
+  .tcard p{font-size:13px;color:var(--mut)}
+  .tcard .role{font-size:11.5px;font-weight:700;color:var(--accent2);margin-top:8px}
+
+  /* vs table */
+  table{width:100%;border-collapse:collapse;font-size:13.5px;overflow:hidden;border-radius:12px}
+  th,td{padding:11px 13px;text-align:left;border-bottom:1px solid var(--line)}
+  th{background:var(--card2);font-size:12px;color:var(--mut);text-transform:uppercase;letter-spacing:.5px}
+  td .x{color:var(--warn);font-weight:700} td .o{color:var(--ok);font-weight:700}
+
+  /* timeline */
+  .tl{position:relative;padding-left:8px}
+  .slot{display:grid;grid-template-columns:96px 1fr;gap:14px;margin-bottom:14px;align-items:stretch}
+  @media(max-width:600px){.slot{grid-template-columns:74px 1fr}}
+  .when{background:var(--accent);color:#fff;border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:10px;text-align:center}
+  .when .t{font-size:13px;font-weight:800} .when .m{font-size:11px;opacity:.85}
+  .slot:nth-child(2) .when{background:#e0982f}
+  .slot:nth-child(3) .when{background:#3aa0ff}
+  .slot:nth-child(4) .when{background:#2ecc71}
+  .do{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:13px 15px}
+  .do b{font-size:14px} .do ul{margin:7px 0 0 18px;font-size:13px;color:var(--mut)} .do li{margin:3px 0}
+
+  pre{background:#0a0c12;border:1px solid var(--line);border-radius:12px;padding:15px;overflow:auto;font-size:12.5px;color:#cdd3e0;line-height:1.5}
+  .codecap{font-size:12px;color:var(--mut);margin-bottom:6px}
+  .routine{display:flex;gap:12px;flex-wrap:wrap}
+  .step{flex:1;min-width:200px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px}
+  .step .num{width:26px;height:26px;border-radius:50%;background:var(--accent2);color:#04231e;font-weight:800;display:flex;align-items:center;justify-content:center;font-size:13px;margin-bottom:8px}
+  .step b{font-size:13.5px} .step p{font-size:12.5px;color:var(--mut);margin-top:4px}
+  .mistakes li{font-size:13.5px;margin:7px 0;list-style:none;padding-left:26px;position:relative}
+  .mistakes li::before{content:"⚠";position:absolute;left:0;color:var(--warn)}
+  .mistakes li b{color:var(--ok)}
+  .foot{margin-top:36px;background:linear-gradient(135deg,#1b1830,#11261f);border:1px solid var(--line);border-radius:14px;padding:20px;text-align:center}
+  .foot b{font-size:16px} .foot p{color:var(--mut);font-size:13.5px;margin-top:8px}
+  .note{font-size:12.5px;color:var(--mut);margin-top:8px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>🚀 하루 만에 끝내는 클로드 셋업 가이드
+    <span class="sub">처음 쓰는 사람도 오늘 안에 — 클로드를 "챗봇"이 아니라 "내 일을 처리하는 시스템"으로 세팅하기</span>
+  </h1>
+
+  <!-- 0 핵심 -->
+  <div class="card" style="margin-top:18px;border-color:var(--accent)">
+    <span class="tag" style="background:#2a2350;color:#c9bcff">핵심 한 줄</span>
+    <div style="font-size:16px;font-weight:600">클로드는 <b>기억하지 못한다.</b> 잘 쓰는 사람과 못 쓰는 사람의 차이는 질문 실력이 아니라 <b style="color:var(--accent2)">구조를 깔아두느냐</b>다.</div>
+    <p class="lead" style="margin-bottom:0">한 번 구조를 만들면 클로드·클로드 코드·옵시디언이 같은 자료를 공유하며 일하는 직원이 된다. 그 구조의 중심은 <b style="color:var(--gh)">GitHub 한 곳</b>이다.</p>
+  </div>
+
+  <!-- 1 MAP -->
+  <h2><span class="n">1</span>전체 도구 지도 — 무엇이 무엇과 연결되나</h2>
+  <p class="lead">도구는 4개의 "입력 엔진" + 1개의 "본진(GitHub)" + 보기용 미러로 나뉜다. 모든 .md 파일이 GitHub로 모이기 때문에 어떤 도구로 작업해도 충돌이 안 난다.</p>
+  <div class="map">
+    <div class="layer-label">① 입력·작업 엔진 (사람이 일하는 도구)</div>
+    <div class="tools">
+      <div class="tool claude"><div class="ico">💬</div><div class="nm">Claude (Cowork)</div><div class="ds">데스크톱 앱. 파일·문서·엑셀·PPT 실제 작업</div></div>
+      <div class="tool code"><div class="ico">⌨️</div><div class="nm">Claude Code</div><div class="ds">터미널 도구. repo 직접 수정·자동화·코드</div></div>
+      <div class="tool obs"><div class="ico">🗂️</div><div class="nm">Obsidian</div><div class="ds">내 지식 second brain. .md 노트 볼트</div></div>
+      <div class="tool herm"><div class="ico">🔁</div><div class="nm">Hermes (자동화)</div><div class="ds">유튜브·자료를 자동 수집해 볼트에 적재</div></div>
+    </div>
+
+    <div class="arrows"><span>커밋 / 동기화</span><span class="down">⬇⬇⬇</span><span>모두 같은 곳으로</span></div>
+
+    <div class="layer-label">② 단일 원본 (SSOT) — 모든 .md의 본진</div>
+    <div class="hub">
+      <div class="ico">🐙</div>
+      <div class="nm">GitHub 저장소(repo)</div>
+      <div class="ds">CLAUDE.md · memory.md · context.md · 노트 전부 여기에. 버전 관리 + 충돌은 머지로 해결</div>
+    </div>
+
+    <div class="arrows"><span class="down">⬇</span><span>보기용으로만 내보냄</span></div>
+
+    <div class="layer-label">③ 보기용 미러 (원본 ✕, 보는 용도만)</div>
+    <div class="mirror">
+      <div class="pill">📊 <b>Notion</b> — 팀이 보는 대시보드</div>
+      <div class="pill">📁 <b>Google Drive</b> — 외부 공유 PDF 등 임시</div>
+    </div>
+    <p class="note">⚡ 왜 이렇게? 원본을 여러 군데(드라이브+노션+로컬) 두면 반드시 충돌난다. <b style="color:var(--txt)">원본은 GitHub 하나, 나머지는 거울.</b></p>
+  </div>
+
+  <!-- 2 each tool one line -->
+  <h2><span class="n">2</span>각 도구는 한마디로 뭐냐</h2>
+  <div class="grid g2">
+    <div class="card tcard claude"><h3>💬 Claude (Cowork)</h3><p>데스크톱 앱. 내 컴퓨터 폴더를 읽고 엑셀·PPT·문서를 실제 파일로 만든다. 말로 시키면 일하는 직원.</p><div class="role">역할 ▸ 일상 작업·문서·전략·리서치</div></div>
+    <div class="card tcard code"><h3>⌨️ Claude Code</h3><p>터미널(명령창)에서 도는 도구. GitHub repo를 통째로 보고 여러 파일을 한 번에 고치고 커밋한다. 자동화·코딩에 강함.</p><div class="role">역할 ▸ repo 대량 작업·자동화·개발</div></div>
+    <div class="card tcard obs"><h3>🗂️ Obsidian</h3><p>로컬 마크다운(.md) 노트 앱. 생각·자료를 연결해 쌓는 "두 번째 뇌". 파일이 .md라 GitHub와 100% 호환.</p><div class="role">역할 ▸ 지식 축적·노트·연결</div></div>
+    <div class="card tcard herm"><h3>🔁 Hermes (자동화 파이프라인)</h3><p>외부 콘텐츠(유튜브 등)를 자동으로 받아 옵시디언 볼트에 정리해 넣는 수집 자동화. 손으로 복붙할 일을 없앤다.</p><div class="role">역할 ▸ 자료 자동 수집·적재</div></div>
+    <div class="card tcard gh"><h3>🐙 GitHub</h3><p>모든 .md의 단일 원본. 옵시디언 볼트 = repo, 클로드 코드가 작업하는 곳, Cowork가 커밋하는 곳. 전부 여기서 만난다.</p><div class="role">역할 ▸ 단일 원본(SSOT)·버전 관리·충돌 해결</div></div>
+    <div class="card tcard" style="border-left-color:var(--gold)"><h3>🧩 어떻게 한몸이 되나</h3><p><b>옵시디언 볼트 폴더 = GitHub repo</b>로 지정하면 끝. 그 안의 .md를 클로드·클로드 코드·Hermes가 모두 같이 본다.</p><div class="role" style="color:var(--gold)">한 폴더, 세 도구, 한 원본</div></div>
+  </div>
+
+  <!-- 3 GitHub vs Drive -->
+  <h2><span class="n">3</span>왜 드라이브가 아니라 GitHub인가</h2>
+  <table>
+    <tr><th>상황</th><th>구글 드라이브</th><th>GitHub</th></tr>
+    <tr><td>동시에 수정</td><td><span class="x">✕ 충돌 / 마지막 저장이 덮어씀</span></td><td><span class="o">✓ 머지로 합쳐짐</span></td></tr>
+    <tr><td>변경 이력</td><td><span class="x">✕ 누가 뭘 바꿨는지 흐릿</span></td><td><span class="o">✓ 커밋마다 전부 기록</span></td></tr>
+    <tr><td>되돌리기</td><td><span class="x">✕ 어렵다</span></td><td><span class="o">✓ 한 줄로 복구</span></td></tr>
+    <tr><td>도구 연동</td><td><span class="x">△ 5xx 저장 오류 잦음</span></td><td><span class="o">✓ 클로드·코드·옵시디언 공통 연결</span></td></tr>
+  </table>
+  <p class="note">코딩을 몰라도 된다. <b style="color:var(--txt)">"이 내용 repo에 커밋해줘"</b>라고 말로 시키면 클로드가 깃 작업을 대신한다.</p>
+
+  <!-- 4 ONE DAY timeline -->
+  <h2><span class="n">4</span>하루 셋업 타임라인 — 오늘 안에 끝</h2>
+  <div class="tl">
+    <div class="slot">
+      <div class="when"><div class="t">오전</div><div class="m">뼈대</div></div>
+      <div class="do"><b>본진 만들기</b>
+        <ul>
+          <li>GitHub 가입 → 빈 저장소(repo) 1개 생성</li>
+          <li><code>CLAUDE.md</code> 작성 (아래 5번 템플릿 복붙)</li>
+          <li>Claude 데스크톱(Cowork)에 그 폴더 연결</li>
+        </ul>
+      </div>
+    </div>
+    <div class="slot">
+      <div class="when"><div class="t">점심</div><div class="m">연결</div></div>
+      <div class="do"><b>도구를 한 폴더로 묶기</b>
+        <ul>
+          <li>Obsidian 설치 → 볼트 위치를 <b>그 repo 폴더</b>로 지정</li>
+          <li>Claude Code 설치 (개발/자동화 할 거면)</li>
+          <li><code>memory.md</code> · <code>context.md</code> 빈 파일 만들고 커밋</li>
+        </ul>
+      </div>
+    </div>
+    <div class="slot">
+      <div class="when"><div class="t">오후</div><div class="m">실전</div></div>
+      <div class="do"><b>실제로 한 번 돌려보기</b>
+        <ul>
+          <li>커넥터 1개 연결 (예: 유튜브·자료 분석)</li>
+          <li>첫 산출물 뽑기 — 엑셀·PPT·문서 하나</li>
+          <li>"이거 repo에 커밋해줘"로 저장까지 확인</li>
+        </ul>
+      </div>
+    </div>
+    <div class="slot">
+      <div class="when"><div class="t">저녁</div><div class="m">자동화</div></div>
+      <div class="do"><b>굴러가게 만들기</b>
+        <ul>
+          <li>Hermes 등 자동 수집 1개 걸기 (유튜브 → 볼트)</li>
+          <li>매일 루틴 3개 정해두기 (아래 6번)</li>
+          <li>"매일 아침 어제 정리해줘" 예약 작업 1개</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5 template -->
+  <h2><span class="n">5</span>CLAUDE.md 시작 템플릿 (복붙용)</h2>
+  <div class="codecap">repo 최상단에 이 파일 하나만 두면 클로드의 톤·품질이 통째로 바뀐다.</div>
+  <pre># 프로젝트 헌법
+
+## 답변 원칙
+- 결론 먼저, 짧고 강하게
+- 선택지를 줄여 1순위 / 2순위 / 버릴 것으로 구분
+- 추상적 조언 금지 → 항상 "오늘 할 일 / 이번 주 할 일"로 쪼갬
+
+## 저장 원칙 (SSOT)
+- 모든 결정·문서는 이 GitHub repo의 .md 에 둔다
+- 원본은 GitHub 하나, 노션·드라이브는 보기용 미러
+- 작업이 끝나면 바로 커밋해서 최신 상태를 박아둔다
+
+## 금지사항
+- 장황한 설명 금지
+- 이론·요약으로 끝내지 말고 항상 실행·비용·리스크로 끝낼 것
+
+## 기본 답변 포맷
+1. 결론  2. 지금 제일 중요한 것  3. 실행 순서 3단계
+4. 버릴 것  5. 주의할 점</pre>
+
+  <!-- 6 routine -->
+  <h2><span class="n">6</span>매일 쓰는 루틴 — 이 3개만 습관화</h2>
+  <div class="routine">
+    <div class="step"><div class="num">1</div><b>시작할 때</b><p>"오늘 작업 시작" → 클로드가 <code>context.md</code>를 읽고 어제 어디까지 했는지 복기.</p></div>
+    <div class="step"><div class="num">2</div><b>결정·인사이트가 나오면</b><p>"이거 memory에 기록하고 커밋해" → 흘려보내지 않고 DB에 쌓음.</p></div>
+    <div class="step"><div class="num">3</div><b>자료가 생기면</b><p>링크를 던지고 "전략으로 바꿔줘" → 요약이 아니라 실행 포인트로 변환.</p></div>
+  </div>
+
+  <!-- 7 mistakes -->
+  <h2><span class="n">7</span>흔한 실수 5가지</h2>
+  <div class="card">
+    <ul class="mistakes">
+      <li>매번 처음부터 설명 → <b>CLAUDE.md·지식에 한 번 넣어두면 끝.</b></li>
+      <li>결정을 채팅에 흘려보냄 → <b>GitHub repo의 memory.md에 커밋. 안 그러면 사라진다.</b></li>
+      <li>원본을 드라이브·노션·로컬에 동시에 둠 → <b>원본은 GitHub 하나, 나머지는 미러.</b></li>
+      <li>모든 자료를 한 번에 다 넣기 → <b>필요한 것만(컨텍스트 다이어트). 많으면 품질 떨어짐.</b></li>
+      <li>자료를 요약만 시키고 끝 → <b>"그래서 뭘 해야 해?"까지 시켜야 돈이 된다.</b></li>
+    </ul>
+  </div>
+
+  <div class="foot">
+    <b>🎯 구조 먼저, 질문은 나중. 파일은 GitHub 하나로.</b>
+    <p>GitHub repo(원본) ← Claude · Claude Code · Obsidian · Hermes 가 모두 연결.<br>
+    원본은 한 곳, 드라이브·노션은 거울. 이러면 충돌 없이 클로드가 내 일을 굴리는 시스템이 된다.</p>
+  </div>
+
+</div>
+</body>
+</html>
